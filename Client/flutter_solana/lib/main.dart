@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_solana/view/SignIn/sign_in.dart';
+import 'package:flutter_solana/view/SignUp/sign_up.dart';
 import 'package:flutter_solana/view/bottom_nav_bar.dart';
+import 'package:flutter_solana/view/home_screen.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get/get.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,12 +17,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'ECO-TOKEN',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const BottomNavBar(),
+      initialRoute: '/sign-in',
+      getPages: [
+        GetPage(name: '/bottom-nav-bar', page: () => const BottomNavBar()),
+        GetPage(name: '/home-screen', page: () => const HomeScreen()),
+        GetPage(name: '/sign-in', page: () => const SignIn()),
+        GetPage(name: '/sign-up', page: () => const SignUp()),
+      ],
     );
   }
 }
