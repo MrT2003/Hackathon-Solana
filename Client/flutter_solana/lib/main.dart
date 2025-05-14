@@ -3,7 +3,6 @@ import 'package:flutter_solana/view/SignIn/sign_in.dart';
 import 'package:flutter_solana/view/SignUp/sign_up.dart';
 import 'package:flutter_solana/view/bottom_nav_bar.dart';
 import 'package:flutter_solana/view/home_screen.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get.dart';
 
 void main() {
@@ -25,7 +24,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/sign-in',
       getPages: [
         GetPage(name: '/bottom-nav-bar', page: () => const BottomNavBar()),
-        GetPage(name: '/home-screen', page: () => const HomeScreen()),
+        GetPage(name: '/home-screen', page: () => const HomeScreen(userName: 'Sugar Daddies')),
         GetPage(name: '/sign-in', page: () => const SignIn()),
         GetPage(name: '/sign-up', page: () => const SignUp()),
       ],

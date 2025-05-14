@@ -17,7 +17,7 @@ class NavController extends GetxController {
   }
 
   final screens = [
-    const HomeScreen(),
+    const HomeScreen(userName: 'Sugar Daddies'),
     const CollectionScreen(),
     const QrCode(),
     const HistoryAndRank(),
@@ -26,19 +26,19 @@ class NavController extends GetxController {
 
   final navBarsItems = [
     PersistentBottomNavBarItem(
-      icon: Icon(Icons.home),
+      icon: const Icon(Icons.home),
       title: ("Home"),
       activeColorPrimary: Colors.blue,
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
-      icon: Icon(Icons.search),
+      icon: const Icon(Icons.search),
       title: ("Collection"),
       activeColorPrimary: Colors.blue,
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
-      icon: Icon(
+      icon: const Icon(
         Icons.qr_code,
         color: Colors.white,
       ),
@@ -46,13 +46,13 @@ class NavController extends GetxController {
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
-      icon: Icon(Icons.star),
+      icon: const Icon(Icons.star),
       title: ("History & Rank"),
       activeColorPrimary: Colors.blue,
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
-      icon: Icon(Icons.person),
+      icon: const Icon(Icons.person),
       title: ("Profile"),
       activeColorPrimary: Colors.blue,
       inactiveColorPrimary: Colors.grey,
