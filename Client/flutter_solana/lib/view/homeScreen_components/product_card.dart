@@ -8,8 +8,7 @@ class ProductCard extends StatelessWidget {
       {required this.imageUrl,
       required this.name,
       required this.price,
-      Key? key})
-      : super(key: key);
+      super.key});
 
   @override
   Widget build(BuildContext context) {
