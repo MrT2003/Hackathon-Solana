@@ -3,6 +3,7 @@ import 'package:flutter_solana/view/SignIn/sign_in.dart';
 import 'package:flutter_solana/view/SignUp/sign_up.dart';
 import 'package:flutter_solana/view/bottom_nav_bar.dart';
 import 'package:flutter_solana/view/home_screen.dart';
+import 'package:flutter_solana/view/setting_screen.dart';
 import 'package:get/get.dart';
 
 void main() {
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'ECO-TOKEN',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF00B14F)),
         useMaterial3: true,
       ),
       initialRoute: '/sign-in',
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/home-screen', page: () => const HomeScreen(userName: 'Sugar Daddies')),
         GetPage(name: '/sign-in', page: () => const SignIn()),
         GetPage(name: '/sign-up', page: () => const SignUp()),
+        GetPage(name: '/setting-screen', page: () => const SettingsScreen()),
       ],
     );
   }
