@@ -26,15 +26,21 @@ class NavController extends GetxController {
 
   final navBarsItems = [
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.home),
+      icon: const Icon(
+        Icons.home,
+        size: 30,
+      ),
       title: ("Home"),
-      activeColorPrimary: Colors.blue,
+      activeColorPrimary: Color(0xFF00B14F),
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.search),
+      icon: const Icon(
+        Icons.search,
+        size: 30,
+      ),
       title: ("Collection"),
-      activeColorPrimary: Colors.blue,
+      activeColorPrimary: Color(0xFF00B14F),
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
@@ -42,19 +48,25 @@ class NavController extends GetxController {
         Icons.qr_code,
         color: Colors.white,
       ),
-      activeColorPrimary: Colors.blue,
+      activeColorPrimary: Color(0xFF00B14F),
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.star),
+      icon: const Icon(
+        Icons.star,
+        size: 30,
+      ),
       title: ("History & Rank"),
-      activeColorPrimary: Colors.blue,
+      activeColorPrimary: Color(0xFF00B14F),
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.person),
+      icon: const Icon(
+        Icons.person,
+        size: 30,
+      ),
       title: ("Profile"),
-      activeColorPrimary: Colors.blue,
+      activeColorPrimary: Color(0xFF00B14F),
       inactiveColorPrimary: Colors.grey,
     ),
   ];
