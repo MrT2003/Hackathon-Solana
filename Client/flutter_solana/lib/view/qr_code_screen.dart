@@ -20,7 +20,7 @@ class QrCodeScreen extends StatelessWidget {
               final String? code = capture.barcodes.first.rawValue;
               if (code != null) {
                 Get.find<TransferController>().setRecipient(code);
-                Get.back();
+                Get.offNamed('/confirm-transfer');
               }
             },
           ),
