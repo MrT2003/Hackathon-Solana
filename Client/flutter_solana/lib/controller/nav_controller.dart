@@ -3,7 +3,7 @@ import 'package:flutter_solana/view/collection_screen.dart';
 import 'package:flutter_solana/view/history_and_rank.dart';
 import 'package:flutter_solana/view/home_screen.dart';
 import 'package:flutter_solana/view/profile_screen.dart';
-import 'package:flutter_solana/view/qr_code.dart';
+import 'package:flutter_solana/view/qr_code_screen.dart';
 import 'package:get/get.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
@@ -19,7 +19,7 @@ class NavController extends GetxController {
   final screens = [
     const HomeScreen(userName: 'Sugar Daddies'),
     const CollectionScreen(),
-    const QrCode(),
+    const QrCodeScreen(),
     const HistoryAndRank(),
     const ProfileScreen(),
   ];
