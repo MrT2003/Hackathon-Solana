@@ -32,8 +32,9 @@
   "homepage": "https://github.com/MrT2003/Hackathon-Solana",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.5.0",
     "express": "^4.21.1",
+    "firebase-admin": "^13.4.0",
     "helmet": "^7.1.0",
     "http-errors": "^2.0.0",
     "morgan": "^1.10.0",

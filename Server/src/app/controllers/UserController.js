@@ -1,3 +1,4 @@
+import {registerNewUser} from "./DatabaseController.js";
 export class UserController {
     getAllUser = async (req, res, next) => {
         try {
@@ -9,4 +10,17 @@ export class UserController {
                 .json({ message: "Server error", error: error.message });
         }
     };
+
+    signup = async (req, res) => {
+        try{
+            registerNewUser(req.body);
+            return res.status(200).json({ success: true, message: "User registered successfully" });
+        }catch (error) {
+            console.error("Error in register:", error);
+            return res
+                .status(500)
+                .json({ message: "Server error", error: error.message });
+        }
+
+    }
 }
