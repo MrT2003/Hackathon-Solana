@@ -5,12 +5,13 @@ const router = Router();
 
 const userController = new UserController();
 
-router.post('/register', isAuthenticated, userController.signup);
-router.post('/login', isAuthenticated, userController.Login);
-router.post('/refresh-token', isAuthenticated, userController.RefreshToken);
+router.post('/register' , isAuthenticated, userController.signup);
+// router.post('/login', isAuthenticated, userController.Login);
+// router.post('/refresh-token', isAuthenticated, userController.RefreshToken);
 
-router.delete('/logout', async (req, res, next) => {
-    res.send('Logout');
-});
+// router.delete('/logout', async (req, res, next) => {
+//     res.send('Logout');
+// });
+router.post ('/transfer', isAuthenticated, )
 
 export { router as authRoute };

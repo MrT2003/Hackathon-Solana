@@ -13,7 +13,8 @@ export class UserController {
 
     signup = async (req, res) => {
         try{
-            registerNewUser(req.body);
+            let user = res.body;
+            registerNewUser(user);
             return res.status(200).json({ success: true, message: "User registered successfully" });
         }catch (error) {
             console.error("Error in register:", error);
@@ -22,5 +23,5 @@ export class UserController {
                 .json({ message: "Server error", error: error.message });
         }
 
-    }
+    };
 }
