@@ -1,16 +1,13 @@
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
 dotenv.config({
-  path: './.env'
+  path: '../.env'
 });
-
-if (!process.env.FIREBASE_CONFIG) {
-  throw new Error('FIREBASE_CONFIG environment variable is not set. Please check your .env file.');
-}
 
 let serviceAccount;
 
 try {
+  console.log('FIREBASE_CONFIG', process.env.FIREBASE_CONFIG);
   // Parse first
   serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
 
@@ -26,4 +23,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-export { admin };
+const db = admin.firestore();
+
+export { admin , db };

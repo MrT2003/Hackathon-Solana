@@ -1,2 +1,4 @@
 /node_modules
 .env
+/keys/eco_token_mint_authority.json
+/keys/server_master_wallet.json
