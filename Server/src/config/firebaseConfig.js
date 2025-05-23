@@ -7,7 +7,6 @@ dotenv.config({
 let serviceAccount;
 
 try {
-  console.log('FIREBASE_CONFIG', process.env.FIREBASE_CONFIG);
   // Parse first
   serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
 
