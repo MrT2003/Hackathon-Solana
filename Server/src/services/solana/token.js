@@ -1,20 +1,20 @@
-const { Token, TOKEN_PROGRAM_ID } = require('@solana/spl-token');
-const { PublicKey, Keypair } = require('@solana/web3.js');
-const { getSolanaConnection } = require('./connection');
-const fs = require('fs');
-import config from '../../config';
+import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { PublicKey, Keypair } from '@solana/web3.js';
+import { getSolanaConnection } from './solana.js';
+import fs from 'fs';
+import config from '../../config/index.js';
 
-// Đọc khóa bí mật của admin từ file bảo mật
+// Read the admin's secret key from environment variable
 const loadAdminWallet = () => {
   const secretKeyString = process.env.ADMIN_WALLET_SECRET_KEY;
   const secretKey = Uint8Array.from(JSON.parse(secretKeyString));
   return Keypair.fromSecretKey(secretKey);
 };
 
-// Khởi tạo token object
+// Initialize the token object
 const initializeToken = async (connection, adminWallet) => {
   const tokenMintAddress = process.env.TOKEN_MINT_ADDRESS;
-  if (!tokenMintAddress) throw new Error('TOKEN_MINT_ADDRESS không được định nghĩa');
+  if (!tokenMintAddress) throw new Error('TOKEN_MINT_ADDRESS is not defined');
   
   return new Token(
     connection,
@@ -24,17 +24,18 @@ const initializeToken = async (connection, adminWallet) => {
   );
 };
 
+// Mint tokens to a recipient's associated token account
 const mintToken = async (recipientPublicKey, amount) => {
   const connection = getSolanaConnection();
   const adminWallet = loadAdminWallet();
   
   try {
-    // Validation the public key is valid or not 
+    // Validate that the recipient public key is valid
     if (!PublicKey.isOnCurve(new PublicKey(recipientPublicKey).toBuffer())) {
-      throw new Error('recipientPublicKey không hợp lệ');
+      throw new Error('Invalid recipientPublicKey');
     }
     if (!Number.isInteger(amount) || amount <= 0) {
-      throw new Error('Số lượng token phải là số nguyên dương');
+      throw new Error('Amount must be a positive integer');
     }
 
     const token = await initializeToken(connection, adminWallet);
@@ -42,7 +43,7 @@ const mintToken = async (recipientPublicKey, amount) => {
       new PublicKey(recipientPublicKey)
     );
 
-    // Mint token
+    // Mint tokens
     const decimals = parseInt(config.TOKEN_DECIMALS) || 2;
     const transaction = await token.mintTo(
       recipientTokenAccount.address,
@@ -51,26 +52,26 @@ const mintToken = async (recipientPublicKey, amount) => {
       amount * Math.pow(10, decimals)
     );
 
-    console.log(`Mint ${amount} token thành công: ${transaction}`);
+    console.log(`Successfully minted ${amount} tokens: ${transaction}`);
     return transaction;
   } catch (error) {
-    console.error('Lỗi khi mint token:', error);
-    throw new Error(`Lỗi khi mint token: ${error.message}`);
+    console.error('Error while minting tokens:', error);
+    throw new Error(`Error while minting tokens: ${error.message}`);
   }
 };
 
-// Chuyển token cho người dùng khi đổi rác
+// Transfer tokens to a user when they exchange waste
 const transferToken = async (recipientPublicKey, amount) => {
   const connection = getSolanaConnection();
   const adminWallet = loadAdminWallet();
   
   try {
-    // Validation
+    // Validate input
     if (!PublicKey.isOnCurve(new PublicKey(recipientPublicKey).toBuffer())) {
-      throw new Error('recipientPublicKey không hợp lệ');
+      throw new Error('Invalid recipientPublicKey');
     }
     if (!Number.isInteger(amount) || amount <= 0) {
-      throw new Error('Số lượng token phải là số nguyên dương');
+      throw new Error('Amount must be a positive integer');
     }
 
     const token = await initializeToken(connection, adminWallet);
@@ -81,15 +82,15 @@ const transferToken = async (recipientPublicKey, amount) => {
       adminWallet.publicKey
     );
 
-    // Kiểm tra số dư admin
+    // Check admin balance
     const adminBalance = await token.getAccountInfo(adminTokenAccount.address);
     const decimals = parseInt(process.env.TOKEN_DECIMALS) || 2;
     const adjustedAmount = amount * Math.pow(10, decimals);
     if (adminBalance.amount < adjustedAmount) {
-      throw new Error('Số dư admin không đủ để chuyển token');
+      throw new Error('Admin does not have enough tokens to transfer');
     }
 
-    // Thực hiện chuyển token
+    // Perform the token transfer
     const transaction = await token.transfer(
       adminTokenAccount.address,
       recipientTokenAccount.address,
@@ -98,14 +99,16 @@ const transferToken = async (recipientPublicKey, amount) => {
       adjustedAmount
     );
 
-    console.log(`Chuyển ${amount} token thành công: ${transaction}`);
+    console.log(`Successfully transferred ${amount} tokens: ${transaction}`);
     return transaction;
   } catch (error) {
-    console.error('Lỗi khi chuyển token:', error);
-    throw new Error(`Lỗi khi chuyển token: ${error.message}`);
+    console.error('Error while transferring tokens:', error);
+    throw new Error(`Error while transferring tokens: ${error.message}`);
   }
 };
 
-module.exports = {
-  transferTokenForRecycling
+export {
+  loadAdminWallet,
+  mintToken,
+  transferToken,
 };

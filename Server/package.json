@@ -1,12 +1,12 @@
 {
   "name": "core",
-  "version": "1.0.0",
+  "version": "1.1",
   "description": "The core for Solana application",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
