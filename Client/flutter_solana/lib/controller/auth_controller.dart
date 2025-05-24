@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -27,7 +28,7 @@ class AuthController extends GetxController {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://emailvalidation.abstractapi.com/v1/?api_key=$_abstractApiKey&email=$email',
+          'https://emailvalidation.abstractapi.com/v1/?api_key=4a710a82920b4fceba3c64edb0b44c34&email=$email',
         ),
       );
 
@@ -103,11 +104,11 @@ class AuthController extends GetxController {
       });
 
       // Wait for email validation result
-      final validEmail = await validateEmailFuture;
-      if (validEmail['valid'] == false) {
-        _showError('Invalid email: $email\nReason: ${validEmail['reason']}');
-        return;
-      }
+      // final validEmail = await validateEmailFuture;
+      // if (validEmail['valid'] == false) {
+      //   _showError('Invalid email: $email\nReason: ${validEmail['reason']}');
+      //   return;
+      // }
 
       // Show success
       Get.snackbar(
@@ -138,7 +139,7 @@ class AuthController extends GetxController {
       String idToken, User user, String name, bool isAdmin) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.24.49:8000/auth/register'),
+        Uri.parse('http://192.168.2.60:8000/auth/register'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -227,35 +228,77 @@ class AuthController extends GetxController {
       final user = userCredential.user;
       if (user == null) throw Exception("Sign in failed");
 
-      // Check if email is verified
+      print("User logged in: ${user.email}");
+
+      // Check if email is verified (uncomment if needed)
       // if (!user.emailVerified) {
       //   _showError('Please verify your email before signing in.');
-      //   await _auth.signOut(); // Sign out unverified user
+      //   await _auth.signOut();
       //   return;
       // }
 
-      // Không cần sync với backend, chỉ dùng Firebase
+      // Get user data from Firestore to check admin role
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get()
+          .timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Timeout when fetching user data');
+        },
+      );
+
+      // Variables for user info
+      bool isAdmin = false;
+      String userName = user.displayName ?? 'User';
+
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+        if (userData != null) {
+          // Safely get admin status and name from Firestore
+          isAdmin = userData['isAdmin'] as bool? ?? false;
+          userName = userData['name'] as String? ?? userName;
+        }
+      } else {
+        // If user document doesn't exist in Firestore, create it with default values
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': user.email,
+          'name': userName,
+          'isAdmin': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        print("Created new user document for: ${user.email}");
+      }
 
       // Show success message
       Get.snackbar(
         'Success',
-        'Welcome back, ${user.displayName ?? 'User'}!',
+        'Welcome back, $userName!',
         backgroundColor: Get.theme.colorScheme.primary,
         colorText: Get.theme.colorScheme.onPrimary,
         snackPosition: SnackPosition.BOTTOM,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       );
 
-      // Navigate to home screen
-      Future.delayed(Duration(seconds: 1), () {
-        Get.offAllNamed(
-            '/bottom-nav-bar'); // Thay đổi route theo ứng dụng của bạn
-      });
+      // Navigate based on admin role
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      if (isAdmin) {
+        print("Navigating to admin home...");
+        Get.offAllNamed('/admin-home');
+      } else {
+        print("Navigating to user home...");
+        Get.offAllNamed('/bottom-nav-bar'); // hoặc '/user-home'
+      }
     } on FirebaseAuthException catch (e) {
       _handleSignInFirebaseError(e);
+    } on Exception catch (e) {
+      print("Sign in exception: $e");
+      _showError('Sign in failed. Please try again.');
     } catch (e) {
       print("Sign in error: $e");
-      _showError('Sign in failed. Please try again.');
+      _showError('An unexpected error occurred. Please try again.');
     } finally {
       isLoading.value = false;
     }
@@ -290,6 +333,7 @@ class AuthController extends GetxController {
     _showError(msg);
   }
 
+// Helper method để tạo _showError nếu chưa có
   /// Sign out user
   Future<void> signOut() async {
     try {
