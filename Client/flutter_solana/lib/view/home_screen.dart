@@ -97,40 +97,62 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     const SearchBarWithFilter(),
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            // Voucher logic
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.10),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                            child: Row(
-                              children: [
-                                Image.asset('assets/icons/voucher.png',
-                                    width: 20, height: 20),
-                                const SizedBox(width: 6),
-                                const Text('Voucher',
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: Colors.black.withOpacity(0.10),
+                        //     blurRadius: 12,
+                        //     offset: const Offset(0, 6),
+                        //   ),
+                        // ],
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 12),
+                      child: Obx(
+                        () => SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: c.categories.map((category) {
+                              final isSelected =
+                                  c.selectedCategory.value == category;
+                              return GestureDetector(
+                                onTap: () =>
+                                    c.selectedCategory.value = category,
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? Colors.green
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      )
+                                    ],
+                                  ),
+                                  child: Text(
+                                    category,
                                     style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black)),
-                              ],
-                            ),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 20),
                     const Text('Rewarding',
@@ -140,13 +162,13 @@ class HomeScreen extends StatelessWidget {
 
                     // 🟢 Product grid
                     Obx(() {
-                      final filteredProducts = c.searchQuery.value.isEmpty
-                          ? c.products
-                          : c.products
-                              .where((p) => p['name']!
-                                  .toLowerCase()
-                                  .contains(c.searchQuery.value.toLowerCase()))
-                              .toList();
+                      final filteredProducts = c.products
+                          .where((p) =>
+                              (c.searchQuery.value.isEmpty ||
+                                  p['name']!.toLowerCase().contains(
+                                      c.searchQuery.value.toLowerCase())) &&
+                              p['category'] == c.selectedCategory.value)
+                          .toList();
 
                       return GridView.builder(
                         shrinkWrap: true,
@@ -156,7 +178,7 @@ class HomeScreen extends StatelessWidget {
                           crossAxisCount: 2,
                           mainAxisSpacing: 12,
                           crossAxisSpacing: 12,
-                          childAspectRatio: 150 / 200,
+                          childAspectRatio: 150 / 220,
                         ),
                         itemCount: filteredProducts.length,
                         itemBuilder: (context, index) {
@@ -188,6 +210,7 @@ class HomeScreen extends StatelessWidget {
                         },
                       );
                     }),
+
                     const SizedBox(height: 24),
                   ],
                 ),

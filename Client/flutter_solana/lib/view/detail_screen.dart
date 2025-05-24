@@ -17,7 +17,7 @@ class DetailScreen extends GetView<DetailController> {
                 Obx(() => Image.network(
                       controller.productImageUrl.value,
                       width: double.infinity,
-                      height: 500,
+                      height: 300,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
                         height: 300,
