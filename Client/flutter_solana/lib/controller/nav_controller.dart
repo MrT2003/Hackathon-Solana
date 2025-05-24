@@ -4,6 +4,7 @@ import 'package:flutter_solana/view/history_and_rank.dart';
 import 'package:flutter_solana/view/home_screen.dart';
 import 'package:flutter_solana/view/profile_screen.dart';
 import 'package:flutter_solana/view/qr_code_screen.dart';
+import 'package:flutter_solana/view/scanner_screen.dart';
 import 'package:get/get.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 

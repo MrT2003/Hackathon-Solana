@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_solana/controller/transfer_controller.dart';
-import 'package:get/get.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class QrCodeScreen extends StatelessWidget {
   const QrCodeScreen({super.key});
@@ -9,66 +7,60 @@ class QrCodeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          MobileScanner(
-            controller: MobileScannerController(
-              detectionSpeed: DetectionSpeed.normal,
-              facing: CameraFacing.back,
-            ),
-            onDetect: (BarcodeCapture capture) {
-              final String? code = capture.barcodes.first.rawValue;
-              if (code != null) {
-                Get.find<TransferController>().setRecipient(code);
-                Get.offNamed('/confirm-transfer');
-              }
-            },
+      appBar: AppBar(
+        title: const Text('QR Code'),
+        backgroundColor: Colors.green[700],
+        centerTitle: true,
+      ),
+      body: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.green.shade100, Colors.green.shade50],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          // Overlay UI
-          Positioned.fill(
-            child: Column(
-              children: [
-                const SizedBox(height: 60),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      // Nút quay lại
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios,
-                            color: Colors.white),
-                        onPressed: () => Get.offAllNamed('/home-screen'),
-                      ),
-                      const Spacer(),
-                      const Text(
-                        'Scan QR Code',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      const SizedBox(width: 48), // để cân đối với icon back
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                // Khung quét QR
-                Container(
-                  width: 250,
-                  height: 250,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white, width: 3),
-                  ),
-                ),
-                const Spacer(),
-                const SizedBox(height: 80),
-              ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Quét mã để truy cập:',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: QrImageView(
+                data: 'https://chat.openai.com/userid',
+                version: QrVersions.auto,
+                size: 200.0,
+                foregroundColor: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'https://chat.openai.com/',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
