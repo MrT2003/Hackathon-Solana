@@ -27,7 +27,7 @@ class AuthController extends GetxController {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://emailvalidation.abstractapi.com/v1/?api_key=$_abstractApiKey&email=$email',
+          'https://emailvalidation.abstractapi.com/v1/?api_key=4a710a82920b4fceba3c64edb0b44c34&email=$email',
         ),
       );
 
@@ -103,11 +103,11 @@ class AuthController extends GetxController {
       });
 
       // Wait for email validation result
-      final validEmail = await validateEmailFuture;
-      if (validEmail['valid'] == false) {
-        _showError('Invalid email: $email\nReason: ${validEmail['reason']}');
-        return;
-      }
+      // final validEmail = await validateEmailFuture;
+      // if (validEmail['valid'] == false) {
+      //   _showError('Invalid email: $email\nReason: ${validEmail['reason']}');
+      //   return;
+      // }
 
       // Show success
       Get.snackbar(
@@ -138,7 +138,7 @@ class AuthController extends GetxController {
       String idToken, User user, String name, bool isAdmin) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.24.49:8000/auth/register'),
+        Uri.parse('http://192.168.2.60:8000/auth/register'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
