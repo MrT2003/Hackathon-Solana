@@ -61,7 +61,7 @@ const mintToken = async (recipientPublicKey, amount) => {
 };
 
 // Transfer tokens to a user when they exchange waste
-const transferToken = async (recipientPublicKey, amount) => {
+const transferTokenFromAdminWallet = async (recipientPublicKey, amount) => {
   const connection = getSolanaConnection();
   const adminWallet = loadAdminWallet();
   
@@ -110,5 +110,5 @@ const transferToken = async (recipientPublicKey, amount) => {
 export {
   loadAdminWallet,
   mintToken,
-  transferToken,
+  transferTokenFromAdminWallet,
 };

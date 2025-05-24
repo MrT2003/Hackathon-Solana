@@ -1,6 +1,6 @@
 import config from '../../config/index.js';
 import { getSolanaConnection } from '../../services/solana/solana.js';
-import { loadAdminWallet, mintToken, transferToken } from '../../services/solana/token.js';
+import { loadAdminWallet, mintToken, transferTokenFromAdminWallet } from '../../services/solana/token.js';
 import { createWallet, getUserWallet, getTokenBalance} from '../../services/solana/wallet.js';
 
 export class SolanaController {
@@ -75,6 +75,31 @@ export class SolanaController {
             return res.status(500).json({
                 success: false,
                 message: "Server error while getting wallet",
+                error: error.message,
+            });
+        }
+    }
+
+    tokenTransferAdmin = async (req, res) => {
+        try {
+            const { recipientPublicKey, amount } = req.body;
+
+            if (!recipientPublicKey || !amount) {
+                return res.status(400).json({ success: false, message: "Recipient public key and amount are required" });
+            }
+
+            const transaction = await transferTokenFromAdminWallet(recipientPublicKey, amount);
+
+            return res.status(200).json({
+                success: true,
+                message: "Tokens transferred successfully",
+                transaction,
+            });
+        } catch (error) {
+            console.error("Error when transferring tokens:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Server error while transferring tokens",
                 error: error.message,
             });
         }

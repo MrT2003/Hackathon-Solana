@@ -99,7 +99,7 @@ const getTokenBalance = async (publicKey, tokenMintAddress = null) => {
       decimals: tokenAccountInfo.value.decimals,
       tokenMintAddress: mintAddress,
       tokenAccountAddress: tokenAccounts.value[0].pubkey.toString(),
-      publicKey: wallet.publicKey,
+      publicKey: publicKey,
       hasTokenAccount: true
     };
     
