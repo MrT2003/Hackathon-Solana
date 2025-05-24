@@ -15,12 +15,11 @@ export class UserController {
     signup = async (req, res) => {
         try {
             const user = req.body;
-            const authenticatedUser = req.user;
             if (req.user && req.user.uid !== undefined){
-                return res.status(500).json({ message: "Server error", error: error.message });
+                return res.status(200).json({ message: "User is already signed up !" });
             }
             res.status(202).json({ message: "User is authenticated" , success: true } );
-            const result = registerNewUser(user);
+            const result = await registerNewUser(user);
             if (result.success) {
                 console.info("User registered successfully !");
             }else{
