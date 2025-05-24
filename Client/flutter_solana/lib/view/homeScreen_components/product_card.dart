@@ -4,10 +4,12 @@ class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String name;
   final String price;
+  final String availability;
   const ProductCard(
       {required this.imageUrl,
       required this.name,
       required this.price,
+      required this.availability,
       super.key});
 
   @override
@@ -54,6 +56,9 @@ class ProductCard extends StatelessWidget {
                       fontWeight: FontWeight.bold, color: Color(0xFF00B050))),
             ],
           ),
+          const SizedBox(height: 4),
+          Text('Available: $availability',
+              style: const TextStyle(fontSize: 12, color: Colors.black54)),
         ],
       ),
     );
