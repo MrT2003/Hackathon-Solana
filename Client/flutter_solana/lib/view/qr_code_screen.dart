@@ -1,11 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class QrCodeScreen extends StatelessWidget {
-  const QrCodeScreen({super.key});
+  final String uid;
+  final String name;
+
+  const QrCodeScreen({
+    super.key,
+    required this.uid,
+    required this.name,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final qrData = jsonEncode({'uid': uid, 'name': name});
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('QR Code'),
@@ -44,19 +55,18 @@ class QrCodeScreen extends StatelessWidget {
                 ],
               ),
               child: QrImageView(
-                data: 'https://chat.openai.com/userid',
+                data: qrData, // dùng dữ liệu có uid và name
                 version: QrVersions.auto,
                 size: 200.0,
                 foregroundColor: Colors.black,
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'https://chat.openai.com/',
-              style: TextStyle(
+            Text(
+              qrData.replaceAll('\n', ' | '),
+              style: const TextStyle(
                 fontSize: 16,
                 color: Colors.black87,
-                decoration: TextDecoration.underline,
               ),
             ),
           ],

@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_solana/controller/user_controller.dart';
+import 'package:flutter_solana/model/user_model.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -6,18 +8,85 @@ import 'dart:convert';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   var rememberMe = false.obs;
 
   /// Check if user is currently signed in
   bool get isSignedIn => _auth.currentUser != null;
 
   /// Get current user
-  User? get currentUser => _auth.currentUser;
+  // User? get currentUser => _auth.currentUser;
 
   var isLoading = false.obs;
   var isPasswordVisible = false.obs;
 
   final String _abstractApiKey = "4a710a82920b4fceba3c64edb0b44c34";
+  // Observable để lưu thông tin user hiện tại
+  Rx<UserModel?> currentUser = Rx<UserModel?>(null);
+  RxString currentUid = ''.obs;
+  RxBool isAdmin = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Lắng nghe thay đổi trạng thái auth
+    _auth.authStateChanges().listen((User? user) async {
+      if (user != null) {
+        currentUid.value = user.uid;
+        print("Current User UID: ${user.uid}");
+        await _loadUserData(); // load Firestore user data
+      } else {
+        currentUser.value = null;
+      }
+    });
+  }
+
+  String? getCurrentUserUid() {
+    final user = _auth.currentUser;
+    if (user != null) {
+      print("Method 1 - Current UID: ${user.uid}");
+      return user.uid;
+    }
+    return null;
+  }
+
+  // Load thông tin user từ Firestore
+  // Future<void> _loadUserData() async {
+  //   final uid = getCurrentUserUid();
+  //   if (uid == null) return;
+
+  //   try {
+  //     final userDoc = await _firestore.collection('users').doc(uid).get();
+
+  //     if (userDoc.exists) {
+  //       final userData = userDoc.data();
+  //       isAdmin.value = userData?['isAdmin'] ?? false;
+  //       print("User data loaded for UID: $uid");
+  //       print("Is Admin: ${isAdmin.value}");
+  //     }
+  //   } catch (e) {
+  //     print("Error loading user data: $e");
+  //   }
+  // }
+
+  Future<void> _loadUserData() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    final doc = await _firestore.collection('users').doc(uid).get();
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null) {
+        currentUser.value = UserModel(
+          uid: uid,
+          name: data['name'] ?? '',
+          email: data['email'] ?? '',
+          isAdmin: data['isAdmin'] ?? false,
+        );
+        isAdmin.value = currentUser.value!.isAdmin;
+      }
+    }
+  }
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -219,7 +288,6 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Sign in with Firebase
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -228,83 +296,53 @@ class AuthController extends GetxController {
       final user = userCredential.user;
       if (user == null) throw Exception("Sign in failed");
 
-      print("User logged in: ${user.email}");
-
-      // Check if email is verified (uncomment if needed)
-      // if (!user.emailVerified) {
-      //   _showError('Please verify your email before signing in.');
-      //   await _auth.signOut();
-      //   return;
-      // }
-
-      // Get user data from Firestore to check admin role
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .get()
-          .timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          throw Exception('Timeout when fetching user data');
-        },
-      );
+          .get();
 
-      // Variables for user info
-      bool isAdmin = false;
       String userName = user.displayName ?? 'User';
+      bool isAdmin = false;
 
       if (userDoc.exists) {
         final userData = userDoc.data();
         if (userData != null) {
-          // Safely get admin status and name from Firestore
           isAdmin = userData['isAdmin'] as bool? ?? false;
           userName = userData['name'] as String? ?? userName;
         }
       } else {
-        // If user document doesn't exist in Firestore, create it with default values
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'email': user.email,
           'name': userName,
           'isAdmin': false,
           'createdAt': FieldValue.serverTimestamp(),
         });
-        print("Created new user document for: ${user.email}");
       }
 
-      // Show success message
-      Get.snackbar(
-        'Success',
-        'Welcome back, $userName!',
-        backgroundColor: Get.theme.colorScheme.primary,
-        colorText: Get.theme.colorScheme.onPrimary,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
+      // ⬇️ Đưa vào UserController để dùng toàn app
+      Get.put(UserController(uid: user.uid, name: userName));
 
-      // Navigate based on admin role
+      Get.snackbar('Success', 'Welcome back, $userName!',
+          backgroundColor: Get.theme.colorScheme.primary,
+          colorText: Get.theme.colorScheme.onPrimary,
+          snackPosition: SnackPosition.BOTTOM);
+
       await Future.delayed(const Duration(milliseconds: 500));
 
       if (isAdmin) {
-        print("Navigating to admin home...");
         Get.offAllNamed('/admin-home');
       } else {
-        print("Navigating to user home...");
-        Get.offAllNamed('/bottom-nav-bar'); // hoặc '/user-home'
+        Get.offAllNamed('/bottom-nav-bar');
       }
     } on FirebaseAuthException catch (e) {
       _handleSignInFirebaseError(e);
-    } on Exception catch (e) {
-      print("Sign in exception: $e");
-      _showError('Sign in failed. Please try again.');
     } catch (e) {
-      print("Sign in error: $e");
       _showError('An unexpected error occurred. Please try again.');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Handle Firebase sign in specific errors
   void _handleSignInFirebaseError(FirebaseAuthException e) {
     String msg;
     switch (e.code) {
@@ -314,22 +352,9 @@ class AuthController extends GetxController {
       case 'wrong-password':
         msg = 'Wrong password provided.';
         break;
-      case 'invalid-email':
-        msg = 'The email address is not valid.';
-        break;
-      case 'user-disabled':
-        msg = 'This user account has been disabled.';
-        break;
-      case 'too-many-requests':
-        msg = 'Too many failed attempts. Please try again later.';
-        break;
-      case 'invalid-credential':
-        msg = 'Invalid email or password.';
-        break;
       default:
         msg = 'Sign in failed: ${e.message}';
     }
-
     _showError(msg);
   }
 
