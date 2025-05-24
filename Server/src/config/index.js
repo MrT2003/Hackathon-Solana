@@ -9,4 +9,7 @@ export default {
   SOLANA_NETWORK:process.env.SOLANA_NETWORK || 'devnet',
   TOKEN_MINT_ADDRESS:process.env.TOKEN_MINT_ADDRESS || 'YourTokenMintAddress',
   ADMIN_WALLET_SECRET_KEY:process.env.ADMIN_WALLET_SECRET_KEY || 'YourAdminWalletSecretKey',
+  TOKEN_DECIMALS: process.env.TOKEN_DECIMALS || 2,
+  FIREBASE_CONFIG: process.env.FIREBASE_CONFIG || "A json config",
+  ENCRYPTIONKEY: process.env.ENCRYPTIONKEY || "YourEncryptionKey",
 };

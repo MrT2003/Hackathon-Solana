@@ -5,8 +5,6 @@ export const registerNewUser = async (user) => {
         const registerInformation = new User(user.uid, user.email, user.createdAt, user.isAdmin, user.name,user.updatedAt);
         const userData = registerInformation.toJSON();
 
-        //store the user information in the database
-        //check if the user already exists
         const userDoc = await db.collection("users").doc(user.uid).get();
         if (userDoc.exists) {
             console.log("User already exists in the database");
