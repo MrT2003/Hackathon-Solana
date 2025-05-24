@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_solana/controller/transfer_controller.dart';
 import 'package:flutter_solana/view/SignIn/sign_in.dart';
 import 'package:flutter_solana/view/SignUp/sign_up.dart';
+import 'package:flutter_solana/view/admin_home.dart';
 import 'package:flutter_solana/view/bottom_nav_bar.dart';
 import 'package:flutter_solana/view/confirm_transfer_screen.dart';
 import 'package:flutter_solana/view/home_screen.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/sign-up', page: () => SignUp()),
         GetPage(name: '/setting-screen', page: () => const SettingsScreen()),
         GetPage(name: '/confirm-transfer', page: () => ConfirmTransferScreen()),
+        GetPage(name: '/admin-home', page: () => const AdminHome()),
       ],
     );
   }
