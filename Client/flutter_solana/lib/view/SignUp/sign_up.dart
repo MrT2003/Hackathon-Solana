@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_solana/controller/auth_controller.dart';
 import 'package:get/get.dart';
 
 class SignUp extends StatelessWidget {
-  const SignUp({super.key});
+  SignUp({super.key});
+
+  final AuthController signUpController = Get.put(AuthController());
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +55,11 @@ class SignUp extends StatelessWidget {
                 const SizedBox(height: 32),
                 // Name Field
                 TextField(
+                  controller: _nameController,
                   decoration: InputDecoration(
                     labelText: "Name",
                     hintText: "Your name",
+                    prefixIcon: Icon(Icons.person, color: Color(0xFF00B14F)),
                     focusedBorder: OutlineInputBorder(
                       borderSide:
                           BorderSide(color: Color(0xFF00B14F), width: 2),
@@ -65,9 +73,12 @@ class SignUp extends StatelessWidget {
                 const SizedBox(height: 30),
                 // Email Field
                 TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: "Email",
                     hintText: "Your email",
+                    prefixIcon: Icon(Icons.email, color: Color(0xFF00B14F)),
                     focusedBorder: OutlineInputBorder(
                       borderSide:
                           BorderSide(color: Color(0xFF00B14F), width: 2),
@@ -80,18 +91,42 @@ class SignUp extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
                 // Password Field
-                TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    hintText: "Your password",
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color(0xFF00B14F), width: 2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                Obx(() => TextField(
+                      controller: _passwordController,
+                      obscureText: !signUpController.isPasswordVisible.value,
+                      decoration: InputDecoration(
+                        labelText: "Password",
+                        hintText: "Your password",
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFF00B14F)),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            signUpController.isPasswordVisible.value
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Color(0xFF00B14F),
+                          ),
+                          onPressed: signUpController.togglePasswordVisibility,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Color(0xFF00B14F), width: 2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    )),
+                const SizedBox(height: 16),
+                // Password requirements
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    "• Password must be at least 6 characters long",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
                     ),
                   ),
                 ),
@@ -100,21 +135,33 @@ class SignUp extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Get.toNamed('/bottom-nav-bar');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF00B14F),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                    child: const Text(
-                      "Create account",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
+                  child: Obx(() => ElevatedButton(
+                        onPressed: signUpController.isLoading.value
+                            ? null
+                            : () {
+                                signUpController.signUp(
+                                  name: _nameController.text.trim(),
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text.trim(),
+                                );
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF00B14F),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: signUpController.isLoading.value
+                            ? CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              )
+                            : const Text(
+                                "Create account",
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white),
+                              ),
+                      )),
                 ),
                 const SizedBox(height: 16),
                 // Sign in

@@ -6,9 +6,12 @@ import 'package:flutter_solana/view/bottom_nav_bar.dart';
 import 'package:flutter_solana/view/confirm_transfer_screen.dart';
 import 'package:flutter_solana/view/home_screen.dart';
 import 'package:flutter_solana/view/setting_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   Get.put(TransferController());
   runApp(const MyApp());
 }
@@ -32,7 +35,7 @@ class MyApp extends StatelessWidget {
             name: '/home-screen',
             page: () => const HomeScreen(userName: 'Sugar Daddies')),
         GetPage(name: '/sign-in', page: () => const SignIn()),
-        GetPage(name: '/sign-up', page: () => const SignUp()),
+        GetPage(name: '/sign-up', page: () => SignUp()),
         GetPage(name: '/setting-screen', page: () => const SettingsScreen()),
         GetPage(name: '/confirm-transfer', page: () => ConfirmTransferScreen()),
       ],

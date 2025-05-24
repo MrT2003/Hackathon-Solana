@@ -37,6 +37,9 @@ dependencies:
   cupertino_icons: ^1.0.6
   get: ^4.7.2
   persistent_bottom_nav_bar: ^6.2.1
+  http: ^1.4.0
+  firebase_auth: ^5.5.4
+  firebase_core: ^3.13.1
   mobile_scanner: ^6.0.10
 
 dev_dependencies:
