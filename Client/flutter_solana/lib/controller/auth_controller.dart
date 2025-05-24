@@ -5,6 +5,13 @@ import 'dart:convert';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  var rememberMe = false.obs;
+
+  /// Check if user is currently signed in
+  bool get isSignedIn => _auth.currentUser != null;
+
+  /// Get current user
+  User? get currentUser => _auth.currentUser;
 
   var isLoading = false.obs;
   var isPasswordVisible = false.obs;
@@ -15,6 +22,7 @@ class AuthController extends GetxController {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
+  /// Validate email using Abstract API
   Future<Map<String, dynamic>> _validateEmail(String email) async {
     try {
       final response = await http.get(
@@ -24,21 +32,18 @@ class AuthController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final validateResult = json.decode(response.body);
-        print("Validate result: $validateResult");
-
-        if (validateResult['deliverability'] != "DELIVERABLE" ||
-            validateResult['is_valid_format']['value'] == false ||
-            validateResult['is_disposable_email']['value'] == true ||
-            validateResult['is_role_email']['value'] == true) {
+        final result = json.decode(response.body);
+        if (result['deliverability'] != "DELIVERABLE" ||
+            result['is_valid_format']['value'] == false ||
+            result['is_disposable_email']['value'] == true ||
+            result['is_role_email']['value'] == true) {
           return {
             'valid': false,
             'reason':
-                'Undeliverable / Disposable / Invalid format / Is role email'
+                'Undeliverable / Disposable / Invalid format / Is role email',
           };
-        } else {
-          return {'valid': true};
         }
+        return {'valid': true};
       } else {
         return {'valid': false, 'reason': 'Email validation service error'};
       }
@@ -46,147 +51,94 @@ class AuthController extends GetxController {
       print("Email validation error: $e");
       return {
         'valid': false,
-        'reason': 'Network error during email validation'
+        'reason': 'Network error during email validation',
       };
     }
   }
 
-  // Sign Up method
+  /// Sign up new user
   Future<void> signUp({
     required String name,
     required String email,
     required String password,
   }) async {
-    // Basic validation
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'All fields are required!',
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showError('All fields are required!');
       return;
     }
 
-    // Password length validation
     if (password.length < 6) {
-      Get.snackbar(
-        'Weak Password',
-        'Password must be at least 6 characters long',
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showError('Password must be at least 6 characters long');
       return;
     }
 
     try {
       isLoading.value = true;
 
-      // Check if user is admin
-      bool isAdmin = email.toLowerCase().contains("admin");
+      final isAdmin = email.toLowerCase().contains("admin");
 
-      print("Name: $name");
-      print("Email: $email");
-      print("Password: $password");
+      // Validate email in background
+      final validateEmailFuture = _validateEmail(email);
 
-      // Validate email using Abstract API
-      final validMail = await _validateEmail(email);
-      print("VALID: ${validMail['valid']}");
-
-      if (validMail['valid'] == false) {
-        Get.snackbar(
-          'Invalid Email',
-          'Invalid email: $email\nReason: ${validMail['reason']}',
-          backgroundColor: Get.theme.colorScheme.error,
-          colorText: Get.theme.colorScheme.onError,
-          snackPosition: SnackPosition.BOTTOM,
-          duration: Duration(seconds: 4),
-        );
-        return;
-      }
-
-      // Create user with Firebase
+      // Create user in Firebase
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Update display name
-      await userCredential.user?.updateDisplayName(name);
+      final user = userCredential.user;
+      if (user == null) throw Exception("User creation failed");
 
-      // Send email verification
-      await userCredential.user?.sendEmailVerification();
+      // Update name & send email verification in parallel
+      await Future.wait([
+        user.updateDisplayName(name),
+        user.sendEmailVerification(),
+      ]);
 
-      // Get Firebase ID token
-      final idToken = await userCredential.user?.getIdToken();
-      print("FIREBASE_ID_TOKEN: $idToken");
+      final idToken = await user.getIdToken();
 
-      // Send token to backend
-      await _syncWithBackend(idToken!, userCredential.user!, name, isAdmin);
+      // Sync with backend (non-blocking)
+      Future.microtask(() {
+        _syncWithBackend(idToken!, user, name, isAdmin);
+      });
 
+      // Wait for email validation result
+      final validEmail = await validateEmailFuture;
+      if (validEmail['valid'] == false) {
+        _showError('Invalid email: $email\nReason: ${validEmail['reason']}');
+        return;
+      }
+
+      // Show success
       Get.snackbar(
         'Success',
-        'Account created successfully! Please check your email for verification.',
+        'Account created! Please verify your email.',
         backgroundColor: Get.theme.colorScheme.primary,
         colorText: Get.theme.colorScheme.onPrimary,
         snackPosition: SnackPosition.BOTTOM,
-        duration: Duration(seconds: 3),
+        duration: Duration(seconds: 1),
       );
 
-      // Navigate to main screen after successful signup
-      Future.delayed(Duration(seconds: 2), () {
-        Get.offAllNamed('/bottomNavBar');
+      // Redirect
+      Future.delayed(Duration(seconds: 1), () {
+        Get.offAllNamed('sign-in');
       });
     } on FirebaseAuthException catch (e) {
-      String errorMessage;
-      switch (e.code) {
-        case 'weak-password':
-          errorMessage = 'The password provided is too weak.';
-          break;
-        case 'email-already-in-use':
-          errorMessage = 'An account already exists for that email.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'The email address is not valid.';
-          break;
-        case 'operation-not-allowed':
-          errorMessage = 'Email/password accounts are not enabled.';
-          break;
-        default:
-          errorMessage = 'Sign up failed: ${e.message}';
-      }
-
-      Get.snackbar(
-        'Sign Up Error',
-        errorMessage,
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: Duration(seconds: 4),
-      );
-    } catch (error) {
-      print("Sign up error: $error");
-      Get.snackbar(
-        'Error',
-        'Sign up failed. Please try again.',
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _handleFirebaseError(e);
+    } catch (e) {
+      print("Sign up error: $e");
+      _showError('Sign up failed. Please try again.');
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Sync user data with backend
+  /// Sync Firebase user with custom backend
   Future<void> _syncWithBackend(
       String idToken, User user, String name, bool isAdmin) async {
     try {
-      final backendResponse = await http.post(
-        Uri.parse(
-            'http://localhost:8000/auth/register'), // Change to your backend URL
+      final response = await http.post(
+        Uri.parse('http://192.168.24.49:8000/auth/register'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -200,12 +152,9 @@ class AuthController extends GetxController {
         }),
       );
 
-      final response = json.decode(backendResponse.body);
-
-      if (backendResponse.statusCode != 200 &&
-          backendResponse.statusCode != 201) {
-        String errorMessage = response['message'] ?? 'No message from backend';
-        throw Exception('Backend sync failed: $errorMessage');
+      final data = json.decode(response.body);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Backend sync failed: ${data['message']}');
       }
 
       print("Backend sync successful");
@@ -213,12 +162,194 @@ class AuthController extends GetxController {
       print("Backend sync error: $e");
       Get.snackbar(
         'Warning',
-        'Account created but failed to sync with server. Please contact support if you experience issues.',
+        'Account created but sync failed. Contact support.',
         backgroundColor: Get.theme.colorScheme.tertiary,
         colorText: Get.theme.colorScheme.onTertiary,
         snackPosition: SnackPosition.BOTTOM,
         duration: Duration(seconds: 4),
       );
+    }
+  }
+
+  /// Show error snackbar
+  void _showError(String message) {
+    Get.snackbar(
+      'Error',
+      message,
+      backgroundColor: Get.theme.colorScheme.error,
+      colorText: Get.theme.colorScheme.onError,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
+  /// Handle Firebase specific errors
+  void _handleFirebaseError(FirebaseAuthException e) {
+    String msg;
+    switch (e.code) {
+      case 'weak-password':
+        msg = 'The password provided is too weak.';
+        break;
+      case 'email-already-in-use':
+        msg = 'An account already exists for that email.';
+        break;
+      case 'invalid-email':
+        msg = 'The email address is not valid.';
+        break;
+      case 'operation-not-allowed':
+        msg = 'Email/password accounts are not enabled.';
+        break;
+      default:
+        msg = 'Sign up failed: ${e.message}';
+    }
+
+    _showError(msg);
+  }
+
+  ////// Sign in existing user
+  Future<void> signIn({
+    required String email,
+    required String password,
+  }) async {
+    if (email.isEmpty || password.isEmpty) {
+      _showError('Email and password are required!');
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      // Sign in with Firebase
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = userCredential.user;
+      if (user == null) throw Exception("Sign in failed");
+
+      // Check if email is verified
+      // if (!user.emailVerified) {
+      //   _showError('Please verify your email before signing in.');
+      //   await _auth.signOut(); // Sign out unverified user
+      //   return;
+      // }
+
+      // Không cần sync với backend, chỉ dùng Firebase
+
+      // Show success message
+      Get.snackbar(
+        'Success',
+        'Welcome back, ${user.displayName ?? 'User'}!',
+        backgroundColor: Get.theme.colorScheme.primary,
+        colorText: Get.theme.colorScheme.onPrimary,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 2),
+      );
+
+      // Navigate to home screen
+      Future.delayed(Duration(seconds: 1), () {
+        Get.offAllNamed(
+            '/bottom-nav-bar'); // Thay đổi route theo ứng dụng của bạn
+      });
+    } on FirebaseAuthException catch (e) {
+      _handleSignInFirebaseError(e);
+    } catch (e) {
+      print("Sign in error: $e");
+      _showError('Sign in failed. Please try again.');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Handle Firebase sign in specific errors
+  void _handleSignInFirebaseError(FirebaseAuthException e) {
+    String msg;
+    switch (e.code) {
+      case 'user-not-found':
+        msg = 'No user found for that email address.';
+        break;
+      case 'wrong-password':
+        msg = 'Wrong password provided.';
+        break;
+      case 'invalid-email':
+        msg = 'The email address is not valid.';
+        break;
+      case 'user-disabled':
+        msg = 'This user account has been disabled.';
+        break;
+      case 'too-many-requests':
+        msg = 'Too many failed attempts. Please try again later.';
+        break;
+      case 'invalid-credential':
+        msg = 'Invalid email or password.';
+        break;
+      default:
+        msg = 'Sign in failed: ${e.message}';
+    }
+
+    _showError(msg);
+  }
+
+  /// Sign out user
+  Future<void> signOut() async {
+    try {
+      isLoading.value = true;
+      await _auth.signOut();
+
+      Get.snackbar(
+        'Success',
+        'Signed out successfully!',
+        backgroundColor: Get.theme.colorScheme.primary,
+        colorText: Get.theme.colorScheme.onPrimary,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 1),
+      );
+
+      Get.offAllNamed('/sign-in');
+    } catch (e) {
+      print("Sign out error: $e");
+      _showError('Sign out failed. Please try again.');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    if (email.isEmpty) {
+      _showError('Please enter your email address.');
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      await _auth.sendPasswordResetEmail(email: email);
+
+      Get.snackbar(
+        'Success',
+        'Password reset email sent! Check your inbox.',
+        backgroundColor: Get.theme.colorScheme.primary,
+        colorText: Get.theme.colorScheme.onPrimary,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 3),
+      );
+    } on FirebaseAuthException catch (e) {
+      String msg;
+      switch (e.code) {
+        case 'user-not-found':
+          msg = 'No user found for that email address.';
+          break;
+        case 'invalid-email':
+          msg = 'The email address is not valid.';
+          break;
+        default:
+          msg = 'Failed to send reset email: ${e.message}';
+      }
+      _showError(msg);
+    } catch (e) {
+      print("Password reset error: $e");
+      _showError('Failed to send reset email. Please try again.');
+    } finally {
+      isLoading.value = false;
     }
   }
 }

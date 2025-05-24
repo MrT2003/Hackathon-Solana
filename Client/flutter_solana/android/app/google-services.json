@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "886808501761",
+    "project_id": "solana-9663f",
+    "storage_bucket": "solana-9663f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:886808501761:android:94b3e03a9f3eb268c66a00",
+        "android_client_info": {
+          "package_name": "com.example.flutter_solana"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "886808501761-26ipnhbtqi9ep9s0411v9hqm57fvpd0j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBh-n2X71tsFhezGiIaz9b15gUgmx0Ritc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "886808501761-26ipnhbtqi9ep9s0411v9hqm57fvpd0j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

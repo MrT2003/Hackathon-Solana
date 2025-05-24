@@ -13,18 +13,17 @@ export class UserController {
 
     signup = async (req, res) => {
         try{
+            res.status(200).json({success: true , message:"Sign up successfully !"})
             const user = req.body;
-            const result = await registerNewUser(user);
+            const result =  registerNewUser(user);
             if(result.success){
-                return res.status(200).json({ success: true, message: "User registered successfully" });
+                console.info("User successfully stored !")
             }else{
-                return res.status(400).json({ success: false, message: result.message });
+                console.error("Fail to store user !")
             }
         }catch (error) {
-            console.error("Error in register:", error);
-            return res
-                .status(500)
-                .json({ message: "Server error", error: error.message });
+            res.status(500).json({success: false , message:"Fail to sign up !"})
+            console.error("Server error while store user:", error);
         }
 
     };
