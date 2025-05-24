@@ -20,14 +20,15 @@ export class UserController {
             const user = req.body;
 
             // Run registerNewUser in the background
-            (async () => {
-                const result = await registerNewUser(user);
+            registerNewUser(user).then((result) => {
                 if (result.success) {
                     console.info("User registered successfully:", result.message);
                 } else {
                     console.error("User registration failed:", result.message);
                 }
-            })();
+            }).catch((error) => {
+                console.error("Error in registerNewUser:", error);
+            });
 
             // Immediately return the response
             if (req.user.uid !== undefined) {
