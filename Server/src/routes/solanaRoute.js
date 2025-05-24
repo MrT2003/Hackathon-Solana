@@ -5,7 +5,9 @@ const router = Router();
 
 const solanaController = new SolanaController();
 
-router.post('/createWallet/:userId', isAuthenticated, solanaController.createNewWallet);
+router.post('/createWallet/:userId',solanaController.createNewWallet);
+router.post('/getWallet/:userId', solanaController.getUserWallet);
+router.post('/getTokenBalance/:publicKey', solanaController.getTokenBalance);
 // router.post('/createWallet/:userId', solanaController.createNewWallet);
 
 export {router as solanaRoute};

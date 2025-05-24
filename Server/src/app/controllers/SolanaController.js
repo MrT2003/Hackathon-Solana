@@ -1,7 +1,7 @@
 import config from '../../config/index.js';
 import { getSolanaConnection } from '../../services/solana/solana.js';
 import { loadAdminWallet, mintToken, transferToken } from '../../services/solana/token.js';
-import { createWallet, getUserWallet} from '../../services/solana/wallet.js';
+import { createWallet, getUserWallet, getTokenBalance} from '../../services/solana/wallet.js';
 
 export class SolanaController {
     createNewWallet = async (req, res) => {
@@ -24,6 +24,57 @@ export class SolanaController {
             return res.status(500).json({
                 success: false,
                 message: "Server error while creating wallet",
+                error: error.message,
+            });
+        }
+    }
+    
+    getTokenBalance = async (req, res) => {
+        try {
+            const publicKey = req.params?.publicKey?.trim();
+            const tokenMintAddress = req.query.tokenMintAddress || null;
+
+            if (!publicKey) {
+                return res.status(400).json({ success: false, message: "Public key is required" });
+            }
+
+            const balance = await getTokenBalance(publicKey, tokenMintAddress);
+
+            return res.status(200).json({
+                success: true,
+                message: "Get token balance successfully",
+                balance,
+            });
+        } catch (error) {
+            console.error("Error when getting token balance:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Server error while getting token balance",
+                error: error.message,
+            });
+        }
+    }
+
+    getUserWallet = async (req, res) => {
+        try {
+            const userId = req.params?.userId?.trim();
+
+            if (!userId) {
+                return res.status(400).json({ success: false, message: "User ID is required" });
+            }
+
+            const wallet = await getUserWallet(userId);
+
+            return res.status(200).json({
+                success: true,
+                message: "Get wallet successfully",
+                wallet,
+            });
+        } catch (error) {
+            console.error("Error when getting wallet:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Server error while getting wallet",
                 error: error.message,
             });
         }
