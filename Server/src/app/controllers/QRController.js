@@ -1,4 +1,4 @@
-import { getSolanaPublicKey } from "./DatabaseController";
+import {getSolanaPublicKey} from "./DatabaseController.js";
 
 export const getQRCodeData = async (req, res) => {
         try {

@@ -1,13 +1,15 @@
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
-import config from '../config/index.js';
+dotenv.config({
+  path: '../.env'
+});
 
 let serviceAccount;
 
 try {
+  console.log('FIREBASE_CONFIG', process.env.FIREBASE_CONFIG);
   // Parse first
-  // serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
-  serviceAccount = JSON.parse(config.FIREBASE_CONFIG);
+  serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
 
   // Then fix the private_key field only
   if (serviceAccount.private_key) {
