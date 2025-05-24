@@ -13,9 +13,13 @@ export class UserController {
 
     signup = async (req, res) => {
         try{
-            let user = res.body;
-            registerNewUser(user);
-            return res.status(200).json({ success: true, message: "User registered successfully" });
+            const user = req.body;
+            const result = await registerNewUser(user);
+            if(result.success){
+                return res.status(200).json({ success: true, message: "User registered successfully" });
+            }else{
+                return res.status(400).json({ success: false, message: result.message });
+            }
         }catch (error) {
             console.error("Error in register:", error);
             return res
