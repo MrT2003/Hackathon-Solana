@@ -7,7 +7,6 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "prettier": "prettier --single-quote --trailing-comma all --tab-width 4 --semi true --write 'src/**/*.{js,json,scss}'"
   },
   "repository": {
     "type": "git",
@@ -18,31 +17,29 @@
   ],
   "author": "Hoang Gia Huy, Ma Phung Nghia",
   "license": "ISC",
-  "lint-staged": {
-    "src/**/*.{js,json}": "prettier --single-quote --trailing-comma all --tab-width 4 --semi true --write"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "bugs": {
     "url": "https://github.com/MrT2003/Hackathon-Solana/tree/main/Server"
   },
   "homepage": "https://github.com/MrT2003/Hackathon-Solana",
   "dependencies": {
+    "@project-serum/anchor": "^0.26.0",
+    "@solana/spl-token": "^0.1.8",
+    "@solana/web3.js": "^1.98.2",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.1",
     "firebase-admin": "^13.4.0",
     "helmet": "^7.1.0",
     "http-errors": "^2.0.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.2",
     "prettier": "^3.2.5"
   }
 }

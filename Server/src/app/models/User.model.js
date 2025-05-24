@@ -1,40 +1,6 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
-const wordListSchema = new Schema({
-    word: String,
-    part_of_speech: {
-        type: Schema.Types.ObjectId,
-        ref: "Content",
-    },
-    meaning: {
-        type: String,
-        required: true,
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now,
-    },
-});
-
-const notifySchema = new Schema({
-    userId: {
-        type: String,
-        required: true,
-        index: true,
-    },
-    title: String,
-    message: String,
-    isRead: {
-        type: Boolean,
-        default: false,
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now,
-    },
-});
-
 const UserSchema = new Schema(
     {
         email: {
@@ -69,8 +35,6 @@ const UserSchema = new Schema(
         target: {
             type: String,
         },
-        wordList: [wordListSchema],
-        notify: [notifySchema],
         historyWorking: {
             type: Schema.Types.ObjectId,
             ref: "History",
