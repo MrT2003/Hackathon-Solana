@@ -13,7 +13,7 @@ export const registerNewUser = async (user) => {
         //if the user does not exist, create a new document
         //and store the user information
         await db.collection("users").doc(user.uid).set(userData);
-        console.log(`Stored ${registerInformation} to database !`);
+        console.log(`Stored ${registerInformation.toJSON()} to database !`);
         return {success: true, message: "User information stored successfully"};
     }catch (error) {
         console.error("Error storing user information:", error);

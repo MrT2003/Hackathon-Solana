@@ -6,5 +6,5 @@ const route = Router();
 const userController = new UserController();
 
 route.get("/", userController.getAllUser);
-route.get("/data", isAuthenticated, getQRCodeData);
+route.get("/data", getQRCodeData);
 export {route as userRoute}
