@@ -9,9 +9,9 @@ const createWallet = async (userId) => {
   const newWallet = Keypair.generate();
   
   // Lưu khóa bí mật an toàn (trong thực tế nên sử dụng hệ thống quản lý khóa chuyên nghiệp)
-  const encryptedSecretKey = encryptSecretKey(newWallet.secretKey);
+     
   
-//   Lưu thông tin ví vào Firebase
+  // Lưu thông tin ví vào Firebase
   await db.collection('wallets').doc(userId).set({
     publicKey: newWallet.publicKey.toString(),
     encryptedSecretKey: encryptedSecretKey,
