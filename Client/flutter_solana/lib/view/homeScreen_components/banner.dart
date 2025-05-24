@@ -12,7 +12,7 @@ class BannerCarousel extends StatelessWidget {
       return Column(
         children: [
           SizedBox(
-            height: 130,
+            height: 180,
             child: PageView.builder(
               controller: PageController(
                 viewportFraction: 1,

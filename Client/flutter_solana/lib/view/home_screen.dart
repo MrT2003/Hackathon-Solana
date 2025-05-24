@@ -5,6 +5,8 @@ import 'homeScreen_components/wallet_card.dart';
 import 'homeScreen_components/banner.dart';
 import 'homeScreen_components/searchBar_filter.dart';
 import 'homeScreen_components/product_card.dart';
+import '../controller/detail_controller.dart';
+import '../view/detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String userName;
@@ -161,12 +163,26 @@ class HomeScreen extends StatelessWidget {
                           final product = filteredProducts[index];
                           return GestureDetector(
                             onTap: () {
-                              // Product tap logic
+                              final DetailController detailController =
+                                  Get.put(DetailController());
+                              final int tokens = int.parse(
+                                  product['price']!.replaceAll(',', ''));
+                              final int availability =
+                                  int.parse(product['availability']!);
+                              detailController.loadProductDetails(
+                                name: product['name']!,
+                                description: product['description']!,
+                                imageUrl: product['imageUrl']!,
+                                tokens: tokens,
+                                availability: availability,
+                              );
+                              Get.to(() => const DetailScreen());
                             },
                             child: ProductCard(
                               imageUrl: product['imageUrl']!,
                               name: product['name']!,
                               price: product['price']!,
+                              availability: product['availability']!,
                             ),
                           );
                         },
