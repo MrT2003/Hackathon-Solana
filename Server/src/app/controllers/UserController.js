@@ -2,6 +2,7 @@ import {registerNewUser} from "./DatabaseController.js";
 export class UserController {
     getAllUser = async (req, res, next) => {
         try {
+            
             return res.status(200).json({ success: true, message: "Get All User" });
         } catch (error) {
             console.error("Error in getAllUser:", error);
@@ -13,18 +14,18 @@ export class UserController {
 
     signup = async (req, res) => {
         try{
-            res.status(200).json({success: true , message:"Sign up successfully !"})
+            
             const user = req.body;
-            const result =  registerNewUser(user);
+            const result = registerNewUser(user);
             if(result.success){
-                console.info("User successfully stored !")
+                console.info("User registered successfully:", result.message);
+                return res.status(200).json({ success: true, message: "Register succesfully" });
             }else{
-                console.error("Fail to store user !")
+                console.error("User registration failed:", result.message);
+                return res.status(500).json({ success: false, message: "Can not register" });
             }
         }catch (error) {
-            res.status(500).json({success: false , message:"Fail to sign up !"})
-            console.error("Server error while store user:", error);
+            console.error("Error in register:", error);
         }
-
     };
 }
