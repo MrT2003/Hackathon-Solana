@@ -21,3 +21,19 @@ export const registerNewUser = async (user) => {
     }
 
 };
+
+
+export const getSolanaPublicKey = async (uid) => { 
+    try{
+        const userDoc = await db.collection("wallets").doc(uid).get();
+        const publicKey = userDoc.data()?.publicKey;
+        if (!publicKey) {
+            console.log("No Solana public key found for user:", uid);
+            return { success: false, message: "No Solana public key found" };
+        }
+        return { success: true, publicKey: publicKey };
+    }catch (error) {
+        console.error("Error fetching Solana public key:", error);
+        return { success: false, message: "Error fetching Solana public key" };
+    }
+}

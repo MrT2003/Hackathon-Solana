@@ -13,18 +13,29 @@ export class UserController {
     };
 
     signup = async (req, res) => {
-        try{
+        try {
+            // After passing the authentication middleware, we can assume that the user is authenticated
+            // and we can access their information from req.user
+
             const user = req.body;
-            const result = registerNewUser(user);
-            if(result.success){
-                console.info("User registered successfully:", result.message);
-                return res.status(200).json({ success: true, message: "Register succesfully" });
-            }else{
-                console.error("User registration failed:", result.message);
-                return res.status(500).json({ success: false, message: "Can not register" });
+
+            // Run registerNewUser in the background
+            (async () => {
+                const result = await registerNewUser(user);
+                if (result.success) {
+                    console.info("User registered successfully:", result.message);
+                } else {
+                    console.error("User registration failed:", result.message);
+                }
+            })();
+
+            // Immediately return the response
+            if (req.user.uid !== undefined) {
+                return res.status(200).json({ success: true, message: "User finished signup!" });
             }
-        }catch (error) {
+        } catch (error) {
             console.error("Error in register:", error);
+            return res.status(500).json({ message: "Server error", error: error.message });
         }
     };
 }
