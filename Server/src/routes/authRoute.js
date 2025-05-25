@@ -6,4 +6,5 @@ const router = Router();
 const userController = new UserController();
 
 router.post('/register' , isAuthenticated, userController.signup);
+// router.post('/register' , userController.signup);
 export { router as authRoute };

@@ -14,9 +14,9 @@ export class UserController {
 
     signup = async (req, res) => {
         try{
-            
             const user = req.body;
-            const result = registerNewUser(user);
+            const result = await registerNewUser(user);
+            
             if(result.success){
                 console.info("User registered successfully:", result.message);
                 return res.status(200).json({ success: true, message: "Register succesfully" });

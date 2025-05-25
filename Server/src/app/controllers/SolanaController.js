@@ -1,7 +1,7 @@
 import config from '../../config/index.js';
 import { getSolanaConnection } from '../../services/solana/solana.js';
 import { loadAdminWallet, mintToken, transferTokenFromAdminWallet } from '../../services/solana/token.js';
-import { createWallet, getUserWallet, getTokenBalance} from '../../services/solana/wallet.js';
+import { createWallet, getUserWallet, getTokenBalance } from '../../services/solana/wallet.js';
 
 export class SolanaController {
     createNewWallet = async (req, res) => {
@@ -28,7 +28,7 @@ export class SolanaController {
             });
         }
     }
-    
+
     getTokenBalance = async (req, res) => {
         try {
             const publicKey = req.params?.publicKey?.trim();
@@ -102,6 +102,22 @@ export class SolanaController {
                 message: "Server error while transferring tokens",
                 error: error.message,
             });
+        }
+    }
+
+    mintTokensToUser = async (req, res) => {
+        try {
+            const { publicKey, amount } = req.body;
+
+            if (!publicKey || !amount) {
+                return res.status(400).json({ success: false, message: "Missing publicKey or amount" });
+            }
+
+            const tx = await mintToken(publicKey, parseInt(amount));
+
+            return res.status(200).json({ success: true, message: "Tokens minted", tx });
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
         }
     }
 }

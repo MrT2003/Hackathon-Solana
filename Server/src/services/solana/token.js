@@ -28,10 +28,11 @@ const initializeToken = async (connection, adminWallet) => {
 const mintToken = async (recipientPublicKey, amount) => {
   const connection = getSolanaConnection();
   const adminWallet = loadAdminWallet();
-  
+
   try {
-    // Validate that the recipient public key is valid
-    if (!PublicKey.isOnCurve(new PublicKey(recipientPublicKey).toBuffer())) {
+    // Validate input
+    const recipient = new PublicKey(recipientPublicKey);
+    if (!PublicKey.isOnCurve(recipient.toBuffer())) {
       throw new Error('Invalid recipientPublicKey');
     }
     if (!Number.isInteger(amount) || amount <= 0) {
@@ -39,21 +40,32 @@ const mintToken = async (recipientPublicKey, amount) => {
     }
 
     const token = await initializeToken(connection, adminWallet);
-    const recipientTokenAccount = await token.getOrCreateAssociatedAccountInfo(
-      new PublicKey(recipientPublicKey)
-    );
+    const recipientTokenAccount = await token.getOrCreateAssociatedAccountInfo(recipient);
 
-    // Mint tokens
     const decimals = parseInt(config.TOKEN_DECIMALS) || 2;
-    const transaction = await token.mintTo(
+    const rawAmount = amount * Math.pow(10, decimals);
+
+    const txSignature = await token.mintTo(
       recipientTokenAccount.address,
       adminWallet,
       [],
-      amount * Math.pow(10, decimals)
+      rawAmount
     );
 
-    console.log(`Successfully minted ${amount} tokens: ${transaction}`);
-    return transaction;
+    console.log(`Successfully minted ${amount} tokens to ${recipientPublicKey}: ${txSignature}`);
+
+    return {
+      success: true,
+      message: `Successfully minted ${amount} tokens`,
+      transactionSignature: txSignature,
+      recipient: recipientPublicKey,
+      tokenMintAddress: token.publicKey.toBase58(),
+      tokenAccountAddress: recipientTokenAccount.address.toBase58(),
+      amount,
+      decimals,
+      amountRaw: rawAmount,
+      timestamp: new Date().toISOString()
+    };
   } catch (error) {
     console.error('Error while minting tokens:', error);
     throw new Error(`Error while minting tokens: ${error.message}`);
