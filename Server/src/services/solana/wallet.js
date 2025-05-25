@@ -16,6 +16,7 @@ const createWallet = async (userId) => {
   try {
     // Tạo ví mới
     const newWallet = Keypair.generate();
+    console.log("secret ke", newWallet.secretKey)
 
     // Mã hóa secretKey
     const encryptedSecretKey = encryptSecretKey(

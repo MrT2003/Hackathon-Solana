@@ -62,13 +62,13 @@ class QrCodeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              qrData.replaceAll('\n', ' | '),
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-            ),
+            // Text(
+            //   qrData.replaceAll('\n', ' | '),
+            //   style: const TextStyle(
+            //     fontSize: 16,
+            //     color: Colors.black87,
+            //   ),
+            // ),
           ],
         ),
       ),

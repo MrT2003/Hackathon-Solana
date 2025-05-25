@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_solana/controller/auth_controller.dart';
 import 'package:flutter_solana/controller/transfer_controller.dart';
 import 'package:flutter_solana/view/SignIn/sign_in.dart';
 import 'package:flutter_solana/view/SignUp/sign_up.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   Get.put(TransferController());
+  Get.put(AuthController());
   runApp(const MyApp());
 }
 

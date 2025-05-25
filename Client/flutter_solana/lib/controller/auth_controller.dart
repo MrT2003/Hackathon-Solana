@@ -208,7 +208,7 @@ class AuthController extends GetxController {
       String idToken, User user, String name, bool isAdmin) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.2.60:8000/auth/register'),
+        Uri.parse('http://192.168.2.60:5000/auth/register'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
