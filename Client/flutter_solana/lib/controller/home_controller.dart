@@ -1,3 +1,4 @@
+import 'package:flutter_solana/services/solana_service.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
@@ -9,7 +10,22 @@ class HomeController extends GetxController {
   final currentBanner = 0.obs;
   void changeBanner(int idx) => currentBanner.value = idx;
 
-  final balance = 2000.obs;
+  final balance = 0.obs;
+  final solanaService = SolanaService();
+
+  Future<void> fetchWalletBalance() async {
+    final publicKey = '41RG1giPhce8efm6VkbSdEa7vtbGW17ep5V7WGYVLbSi';
+    final result = await solanaService.getTokenBalance(publicKey);
+    if (result != null) {
+      balance.value = result;
+    }
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchWalletBalance();
+  }
 
   final products = <Map<String, String>>[
     {
