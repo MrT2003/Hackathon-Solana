@@ -7,7 +7,7 @@ const solanaController = new SolanaController();
 
 router.post('/createWallet/:userId',solanaController.createNewWallet);
 router.post('/getWallet/:userId', solanaController.getUserWallet);
-router.post('/getTokenBalance/:publicKey', solanaController.getTokenBalance);
+router.get('/getTokenBalance/:publicKey', solanaController.getTokenBalance);
 router.post('/transferTokenAdmin', solanaController.tokenTransferAdmin);
 router.post('/mintToken', solanaController.mintTokensToUser);
 // router.post('/createWallet/:userId', solanaController.createNewWallet);

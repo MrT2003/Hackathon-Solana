@@ -6,16 +6,22 @@ import 'package:qr_flutter/qr_flutter.dart';
 class QrCodeScreen extends StatelessWidget {
   final String uid;
   final String name;
+  final String publicKey;
 
   const QrCodeScreen({
     super.key,
     required this.uid,
     required this.name,
+    required this.publicKey,
   });
 
   @override
   Widget build(BuildContext context) {
-    final qrData = jsonEncode({'uid': uid, 'name': name});
+    final qrData = jsonEncode({
+      'uid': uid,
+      'name': name,
+      'publicKey': publicKey,
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -55,20 +61,13 @@ class QrCodeScreen extends StatelessWidget {
                 ],
               ),
               child: QrImageView(
-                data: qrData, // dùng dữ liệu có uid và name
+                data: qrData,
                 version: QrVersions.auto,
                 size: 200.0,
                 foregroundColor: Colors.black,
               ),
             ),
             const SizedBox(height: 20),
-            // Text(
-            //   qrData.replaceAll('\n', ' | '),
-            //   style: const TextStyle(
-            //     fontSize: 16,
-            //     color: Colors.black87,
-            //   ),
-            // ),
           ],
         ),
       ),

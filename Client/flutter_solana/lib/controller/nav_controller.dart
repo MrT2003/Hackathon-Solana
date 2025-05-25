@@ -24,7 +24,11 @@ class NavController extends GetxController {
     return [
       HomeScreen(userName: user?.name ?? 'Guest'),
       const CollectionScreen(),
-      QrCodeScreen(uid: user?.uid ?? '', name: user?.name ?? ''),
+      QrCodeScreen(
+        uid: user?.uid ?? '',
+        name: user?.name ?? '',
+        publicKey: user?.walletPublicKey ?? '',
+      ),
       const HistoryAndRank(),
       const ProfileScreen(),
     ];

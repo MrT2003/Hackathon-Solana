@@ -50,25 +50,6 @@ class AuthController extends GetxController {
     return null;
   }
 
-  // Load thông tin user từ Firestore
-  // Future<void> _loadUserData() async {
-  //   final uid = getCurrentUserUid();
-  //   if (uid == null) return;
-
-  //   try {
-  //     final userDoc = await _firestore.collection('users').doc(uid).get();
-
-  //     if (userDoc.exists) {
-  //       final userData = userDoc.data();
-  //       isAdmin.value = userData?['isAdmin'] ?? false;
-  //       print("User data loaded for UID: $uid");
-  //       print("Is Admin: ${isAdmin.value}");
-  //     }
-  //   } catch (e) {
-  //     print("Error loading user data: $e");
-  //   }
-  // }
-
   Future<void> _loadUserData() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
@@ -77,12 +58,24 @@ class AuthController extends GetxController {
     if (doc.exists) {
       final data = doc.data();
       if (data != null) {
+        // Tránh lỗi nếu field 'walletPublicKey' không tồn tại hoặc không phải map
+        final walletMap = data['walletPublicKey'];
+        String publicKey = '';
+
+        if (walletMap != null &&
+            walletMap is Map &&
+            walletMap['publicKey'] != null) {
+          publicKey = walletMap['publicKey'];
+        }
+
         currentUser.value = UserModel(
           uid: uid,
           name: data['name'] ?? '',
           email: data['email'] ?? '',
           isAdmin: data['isAdmin'] ?? false,
+          walletPublicKey: publicKey,
         );
+
         isAdmin.value = currentUser.value!.isAdmin;
       }
     }
@@ -171,13 +164,6 @@ class AuthController extends GetxController {
       Future.microtask(() {
         _syncWithBackend(idToken!, user, name, isAdmin);
       });
-
-      // Wait for email validation result
-      // final validEmail = await validateEmailFuture;
-      // if (validEmail['valid'] == false) {
-      //   _showError('Invalid email: $email\nReason: ${validEmail['reason']}');
-      //   return;
-      // }
 
       // Show success
       Get.snackbar(
