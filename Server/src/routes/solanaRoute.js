@@ -10,6 +10,7 @@ router.post('/getWallet/:userId', solanaController.getUserWallet);
 router.post('/getTokenBalance/:publicKey', solanaController.getTokenBalance);
 router.post('/transferTokenAdmin', solanaController.tokenTransferAdmin);
 router.post('/mintToken', solanaController.mintTokensToUser);
+router.get('/getTransactionsHistory/:publicKey', solanaController.getTransactionHistory);
 // router.post('/createWallet/:userId', solanaController.createNewWallet);
 
 export {router as solanaRoute};

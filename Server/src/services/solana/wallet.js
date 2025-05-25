@@ -4,6 +4,9 @@ import { encryptSecretKey } from '../../utils/encrypt.js';
 import config from '../../config/index.js';
 import admin from 'firebase-admin';
 import { getSolanaConnection } from './solana.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { getAssociatedTokenAddress } = require('@solana/spl-token');
 
 const createWallet = async (userId) => {
   // Kiểm tra user có tồn tại không
@@ -113,8 +116,99 @@ const getTokenBalance = async (publicKey, tokenMintAddress = null) => {
   }
 };
 
+// const getWalletTransactionsHistory = async (publicKey) => {
+//   const connection = getSolanaConnection();
+
+//   try {
+//     const tokenAccount = await getAssociatedTokenAddress(
+//       new PublicKey(config.TOKEN_MINT_ADDRESS),
+//       new PublicKey(publicKey)
+//     );
+
+//     const signatures = await connection.getSignaturesForAddress(tokenAccount);
+
+//     const transactions = [];
+//     for (const sig of signatures.slice(0, 10)) { // Giới hạn 10 giao dịch gần nhất
+//       const tx = await connection.getParsedTransaction(sig.signature);
+//       if (tx) {
+//         transactions.push({
+//           signature: sig.signature,
+//           blockTime: tx.blockTime,
+//           slot: tx.slot,
+//           instructions: tx.transaction.message.instructions
+//         });
+//       }
+//     }
+
+//     return transactions;
+//   } catch (error) {
+//     console.error("Error getting transaction history:", error);
+//     return {
+//       success: false,
+//       message: "Failed to get transaction history",
+//       error: error.message
+//     };
+//   }
+// }
+
+
+async function getWalletTransactionsHistory(walletAddress, tokenMintAddress = null) {
+  const connection = getSolanaConnection();
+  const mintAddress = tokenMintAddress || config.TOKEN_MINT_ADDRESS;
+  
+  try {
+    // Thay vì dùng getAssociatedTokenAddress, dùng getTokenAccountsByOwner
+    const tokenAccounts = await connection.getTokenAccountsByOwner(
+      new PublicKey(walletAddress),
+      { mint: new PublicKey(mintAddress) }
+    );
+    
+    if (tokenAccounts.value.length === 0) {
+      return [];
+    }
+    
+    // Lấy signatures cho tất cả token accounts
+    let allSignatures = [];
+    for (const account of tokenAccounts.value) {
+      const signatures = await connection.getSignaturesForAddress(account.pubkey);
+      allSignatures.push(...signatures);
+    }
+    
+    // Loại bỏ duplicates
+    const uniqueSignatures = allSignatures.filter((sig, index, self) => 
+      index === self.findIndex(s => s.signature === sig.signature)
+    );
+    
+    // Lấy chi tiết giao dịch
+    const transactions = [];
+for (const sig of uniqueSignatures.slice(0, 10)) {
+  const tx = await connection.getParsedTransaction(sig.signature);
+  if (tx) {
+    // Lọc và thêm metadata hữu ích
+    tx.transaction.message.instructions.forEach(instruction => {
+      if (instruction.parsed && instruction.parsed.info) {
+        transactions.push({
+          ...instruction.parsed.info,
+          transactionType: instruction.parsed.type,
+          signature: sig.signature,
+          blockTime: tx.blockTime,
+          program: instruction.program
+        });
+      }
+    });
+  }
+}
+    
+    return transactions;
+  } catch (error) {
+    console.error('Error:', error);
+    return [];
+  }
+}
+
 export {
   createWallet,
   getUserWallet,
-  getTokenBalance
+  getTokenBalance,
+  getWalletTransactionsHistory
 };

@@ -1,7 +1,7 @@
 import config from '../../config/index.js';
 import { getSolanaConnection } from '../../services/solana/solana.js';
 import { loadAdminWallet, mintToken, transferTokenFromAdminWallet } from '../../services/solana/token.js';
-import { createWallet, getUserWallet, getTokenBalance } from '../../services/solana/wallet.js';
+import { createWallet, getUserWallet, getTokenBalance, getWalletTransactionsHistory } from '../../services/solana/wallet.js';
 
 export class SolanaController {
     createNewWallet = async (req, res) => {
@@ -120,6 +120,33 @@ export class SolanaController {
             return res.status(500).json({ success: false, message: error.message });
         }
     }
+
+    getTransactionHistory = async (req, res) => {
+        try {
+            const publicKey = req.params?.publicKey?.trim();
+
+            if (!publicKey) {
+                return res.status(400).json({ success: false, message: "Public key is required" });
+            }
+
+            const transactions = await getWalletTransactionsHistory(publicKey);
+
+            return res.status(200).json({
+                success: true,
+                message: "Transaction history retrieved successfully",
+                transactions,
+            });
+        } catch (error) {
+            console.error("Error when getting transaction history:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Server error while getting transaction history",
+                error: error.message,
+            });
+        }
+    }
+
+
 }
 
 
